@@ -5,27 +5,14 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false
+            gravity: {y : 200}
         }
     },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
+    scene : [ StartScreen ]
 };
 
-var player;
-var stars;
-var bombs;
-var platforms;
-var cursors;
-var score = 0;
-var gameOver = false;
-var scoreText;
-
 var game = new Phaser.Game(config);
-
+/*
 function preload ()
 {
     this.load.image('sky', 'assets/sky.png');
@@ -115,4 +102,4 @@ function update ()
 
 function checkMovement(player){
     
-}
+}*/
