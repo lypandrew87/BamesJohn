@@ -23,7 +23,8 @@ var cursors;
 var score = 0;
 var gameOver = false;
 var scoreText;
-
+var playerOneControls; 
+var playerTwoControls; 
 var game = new Phaser.Game(config);
 
 function preload ()
@@ -41,78 +42,81 @@ function create ()
 
     // The player and its settings
     player1 = this.physics.add.image(100, 450, 'player1').setScale(.5);
-    player2 = this.physics.add.image(100, 500, 'player2').setScale(.5);
-
-    //  Player physics properties. Give the little guy a slight bounce.
-    player1.setCollideWorldBounds(true);
+    player2 = this.physics.add.image(500 ,500, 'player2').setScale(.5);
     player2.setCollideWorldBounds(true);
 
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
+    
+    aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+    sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    dKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+    wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
 
-    //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
-    stars = this.physics.add.group({
-        key: 'star',
-        repeat: 11,
-        setXY: { x: 12, y: 0, stepX: 70 }
-    });
+    shots = this.physics.add.group();
 
-    stars.children.iterate(function (child) {
 
-        //  Give each star a slightly different bounce
-        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-
-    });
-
-    bombs = this.physics.add.group();
-
-    //  Collide the player and the stars with the platforms
-    this.physics.add.collider(player1, platforms);
-    this.physics.add.collider(stars, platforms);
-    this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(shots, player2);
 
 }
 
 function update ()
 {
-    if (gameOver)
-    {
-        return;
+    playerOneControls = {
+        leftPressed : cursors.left.isDown,
+        rightPressed : cursors.right.isDown,
+        upPressed : cursors.up.isDown,
+        downPressed : cursors.down.isDown, 
+        spacePressed : cursors.space.isDown,
     }
-    checkMovement(player1); 
-    checkMovement(player2); 
+    playerTwoControls = {
+        leftPressed : aKey.isDown,
+        rightPressed : dKey.isDown,
+        upPressed : wKey.isDown,
+        downPressed : sKey.isDown, 
+        spacePressed : cursors.shift.isDown,
+    }
 
-    if (cursors.left.isDown)
+    checkMovement(player1, playerOneControls, false, this); 
+    checkMovement(player2, playerTwoControls,true,  this); 
+}
+
+function checkMovement(player,playerControls, shotLeft, context){
+    if (playerControls.leftPressed)
     {
-        player1.setVelocityX(-160);
+        player.setVelocityX(-160);
     }
-    else if (cursors.right.isDown)
+    else if (playerControls.rightPressed)
     {
-        player1.setVelocityX(160);
+        player.setVelocityX(160);
     }else{
-        player1.setVelocityX(0);
+        player.setVelocityX(0);
     }
 
-    if (cursors.up.isDown)
+    if (playerControls.upPressed)
     {
-        player1.setVelocityY(-160);
+        player.setVelocityY(-160);
     }
-    else if (cursors.down.isDown)
+    else if (playerControls.downPressed)
     {
-        player1.setVelocityY(160);
+        player.setVelocityY(160);
     }
     else
     {
-        player1.setVelocityY(0);
+        player.setVelocityY(0);
     }
     
-    if(cursors.space.isDown){
-        var currentShot = this.physics.add.image(player1.x + 40, player1.y + -15, 'shot');
-        currentShot.setVelocityX(1000); 
-
+    if(playerControls.spacePressed){
+        var shot;
+        if(shotLeft){
+           shot = shots.create(player.x - 40, player.y  - 15, 'shot') 
+           shot.setVelocityX(-1000);
+        }else{
+            shot = shots.create(player.x + 40, player.y -15, 'shot')
+            shot.setVelocityX(1000);
+        }
+        shot.setCollideWorldBounds(true);
+        shot.setBounce(1);
+         
     }
-}
-
-function checkMovement(player){
-    
 }
