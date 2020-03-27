@@ -1,3 +1,6 @@
+var shots;
+
+
 class StartScreen extends Phaser.Scene {
 	
 	//Call custructor from parent class
@@ -8,6 +11,7 @@ class StartScreen extends Phaser.Scene {
 	//Load Assets
 	preload(){
 	this.load.image('sky', 'assets/sky.png');
+	this.load.image('player2', 'assets/blueMan.png');
 	this.load.image('player1', 'assets/blueMan.png');
 	this.load.image('shot', 'assets/bomb.png');
 	this.load.audio('pew',['assets/pew.mp3']);
@@ -15,21 +19,32 @@ class StartScreen extends Phaser.Scene {
 
 	//Actualy Make the Scene
 	create() {
+		var bullet;
 		//Add image I don't care to move or change in scene
 		this.add.image (400,300,'sky');
 
 		//Add image I do want to use and change (add the .physics. if you need it to interact and stuff)
-		this.player1 = this.physics.add.image(400,300,'player1').setScale(0.5);
+		this.player1 = this.physics.add.image(200,300,'player1').setScale(0.5);
 		this.player1.setCollideWorldBounds(true);
 		this.player1.setVelocity(0,0);
 
+		this.player2 = this.physics.add.image(400,300,'player2').setScale(0.5);
+		this.player2.setCollideWorldBounds(true);
+		this.player2.setVelocity(0,0);
+
 		this.gunshot = this.sound.add("pew");
 
+
+		shots = this.physics.add.group();
+
+
+   		this.physics.add.collider(shots, this.player2);
+   		
 		//Example of event happenning once on key press (nothing happens if you hold it down)
 		this.input.keyboard.on('keydown_D',function(event){
-			var bullet = this.physics.add.image(this.player1.x+40,this.player1.y-15, "shot");
-			bullet.setVelocityX(1000);
-			this.gunshot.play();
+		var shot = shots.create(this.player1.x + 28, this.player1.y  - 15, 'shot');
+        shot.setVelocityX(1000);
+		this.gunshot.play();
 		},this);
 
 		this.input.keyboard.on('keydown_UP',function(event){
@@ -43,24 +58,24 @@ class StartScreen extends Phaser.Scene {
 		this.key_DOWN = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 		this.key_SPACE = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACEBAR);
 	}
-
 	//Runs repetadley and cheks for events
 	update(delta) {
-		//Shoot Gun
-		//if(this.key_SPACE.)
-		
+
+		this.physics.overlap(shots, this.player2, collisionHandler,null,this);
+
 		//Move Left
 		if(this.key_LEFT.isDown)
 			this.player1.setVelocityX(-100);
-			
 		//Move Right
 		else if(this.key_RIGHT.isDown)
 			this.player1.setVelocityX(100);
-		//Move Down
-		else if(this.key_DOWN.isDown)
-			this.player1.y+=3;
 		else{
 			this.player1.setVelocityX(0);
 		}
 	}
 }
+
+function collisionHandler(shot,player2){
+	console.log("Oh no I was hit");
+}
+
